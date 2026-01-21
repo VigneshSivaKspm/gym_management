@@ -1,9 +1,6 @@
 {
   "buildCommand": "npm run build",
   "devCommand": "vite",
-  "env": {
-    "ADMIN_SECRET_CODE": "@admin_secret_code"
-  },
   "functions": {
     "api/**/*.ts": {
       "memory": 1024,
