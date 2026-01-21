@@ -7,12 +7,16 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ) {
+  console.log("🔵 [REGISTER] Request received", { method: req.method });
+  
   if (req.method !== "POST") {
+    console.log("🔴 [REGISTER] Method not allowed");
     return res.status(405).json({ message: "Method not allowed" });
   }
 
   try {
     const { email, password, name, phone, role = "TRAINEE", admin_code } = req.body;
+    console.log("🔵 [REGISTER] Parsed body:", { email, name, phone, role });
 
     if (!email || !password || !name) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -31,15 +35,21 @@ export default async function handler(
     }
 
     // Check if user exists
+    console.log("🔵 [REGISTER] Checking if user exists:", email);
     const existing = await firebaseAdminService.getUserByEmail(email);
+    console.log("🔵 [REGISTER] User exists check result:", !!existing);
     if (existing) {
+      console.log("🔴 [REGISTER] Email already exists");
       return res.status(400).json({ message: "Email already exists" });
     }
 
     // Hash password
+    console.log("🔵 [REGISTER] Hashing password");
     const passwordHash = await hashPassword(password);
+    console.log("✅ [REGISTER] Password hashed successfully");
 
     // Create user with phone if provided
+    console.log("🔵 [REGISTER] Creating user in Firebase");
     const user = await firebaseAdminService.createUser(
       email,
       passwordHash,
@@ -47,6 +57,7 @@ export default async function handler(
       role.toUpperCase(),
       phone
     );
+    console.log("✅ [REGISTER] User created:", user.id);
 
     // Create profile based on role
     if (role.toUpperCase() === "TRAINER") {
