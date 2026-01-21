@@ -85,7 +85,9 @@ const DashboardOverview = ({ dashboardData }) => {
   ]
 
   // AI Suggestions - using real data with fallback
-  const aiSuggestions = aiSuggestionsData.length > 0 ? aiSuggestionsData : [
+  const aiSuggestions = aiSuggestionsData.length > 0 ? aiSuggestionsData.map(item => 
+    typeof item === 'string' ? item : item.text || item.suggestion || item.message || 'No suggestion'
+  ) : [
     "No AI suggestions available at the moment.",
     "Check back later for personalized recommendations.",
     "Add more data to enable AI insights."

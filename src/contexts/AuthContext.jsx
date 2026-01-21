@@ -1,6 +1,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { authApi, clearCache } from "../utils/api";
 import toast from "react-hot-toast";
+import { 
+  adminLogin as adminLoginService, 
+  adminRegister as adminRegisterService,
+  traineeLogin as traineeLoginService,
+  traineeRegister as traineeRegisterService,
+  trainerLogin as trainerLoginService,
+  trainerRegister as trainerRegisterService,
+  getUserProfile,
+  saveAuthToken,
+  clearAuthToken,
+  getAuthToken,
+  saveCurrentUser,
+  getCurrentUser
+} from "../services/authService.js";
 
 const AuthContext = createContext(null);
 
@@ -20,7 +33,14 @@ export const AuthProvider = ({ children }) => {
   -------------------------------------*/
   useEffect(() => {
     if (token) fetchProfile();
-    else setLoading(false);
+    else {
+      // Try to load user from localStorage
+      const savedUser = getCurrentUser();
+      if (savedUser) {
+        setUser(savedUser);
+      }
+      setLoading(false);
+    }
   }, [token]);
 
   /* ------------------------------------
@@ -28,18 +48,16 @@ export const AuthProvider = ({ children }) => {
   -------------------------------------*/
   const fetchProfile = async () => {
     try {
-      const res = await authApi.getProfile();
-      const profile = res?.data?.user || res?.data;
+      // Load user from localStorage first
+      const savedUser = getCurrentUser();
+      if (savedUser) {
+        setUser(savedUser);
+        setLoading(false);
+        return;
+      }
 
-      if (!profile) throw new Error("Invalid profile response");
-
-      // 🔥 ALWAYS force uppercase roles
-      const normalized = {
-        ...profile,
-        role: profile.role?.toUpperCase()
-      };
-
-      setUser(normalized);
+      // If no saved user but token exists, this is an error state
+      throw new Error("No user profile found");
     } catch (error) {
       console.error("❌ Profile Error:", error);
       forceLogout();
@@ -53,29 +71,31 @@ export const AuthProvider = ({ children }) => {
   -------------------------------------*/
   const login = async (credentials) => {
     try {
-      const res = await authApi.login(credentials);
-      let { access_token, refresh_token, user } = res.data;
+      const result = await traineeLoginService(credentials.email, credentials.password);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const { user, idToken, refreshToken } = result;
 
       // 🔥 Normalize role
-      user = { ...user, role: user.role?.toUpperCase() };
+      const normalizedUser = { 
+        ...user, 
+        role: user.role?.toUpperCase() 
+      };
 
-      if (!access_token || !user)
-        throw new Error("Invalid login response from server");
+      // Save tokens and user
+      saveAuthToken(idToken, refreshToken);
+      saveCurrentUser(normalizedUser);
 
-      localStorage.setItem("access_token", access_token);
-      localStorage.setItem("refresh_token", refresh_token || "");
-
-      setToken(access_token);
-      setUser(user);
+      setToken(idToken);
+      setUser(normalizedUser);
 
       toast.success("Login successful");
-      return { success: true, user };
+      return { success: true, user: normalizedUser };
     } catch (err) {
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Invalid login credentials";
-
+      const msg = err.message || "Invalid login credentials";
       toast.error(msg);
       return { success: false, error: msg };
     }
@@ -86,45 +106,126 @@ export const AuthProvider = ({ children }) => {
   -------------------------------------*/
   const adminLogin = async ({ email, password }) => {
     try {
-      const res = await authApi.adminLogin({ email, password });
-      let { access_token, refresh_token, user } = res.data;
+      const result = await adminLoginService(email, password);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const { user, idToken, refreshToken } = result;
 
       // 🔥 Normalize role
-      user = { ...user, role: user.role?.toUpperCase() };
+      const normalizedUser = {
+        ...user,
+        role: user.role?.toUpperCase()
+      };
 
-      localStorage.setItem("access_token", access_token);
-      localStorage.setItem("refresh_token", refresh_token || "");
+      // Save tokens and user
+      saveAuthToken(idToken, refreshToken);
+      saveCurrentUser(normalizedUser);
 
-      setToken(access_token);
-      setUser(user);
+      setToken(idToken);
+      setUser(normalizedUser);
 
       toast.success("Admin login successful");
-      return { success: true, user };
+      return { success: true, user: normalizedUser };
     } catch (err) {
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Admin login failed";
-
+      const msg = err.message || "Admin login failed";
       toast.error(msg);
       return { success: false, error: msg };
     }
   };
 
   /* ------------------------------------
-               REGISTER
+               REGISTER (TRAINEE)
   -------------------------------------*/
   const register = async (payload) => {
     try {
-      const res = await authApi.register(payload);
-      toast.success("Registration successful");
-      return { success: true, data: res.data };
-    } catch (err) {
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        "Registration failed";
+      const result = await traineeRegisterService(payload);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
 
+      toast.success("Registration successful");
+      return { success: true, data: result };
+    } catch (err) {
+      const msg = err.message || "Registration failed";
+      toast.error(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  /* ------------------------------------
+              ADMIN REGISTER
+  -------------------------------------*/
+  const adminRegister = async (payload) => {
+    try {
+      const result = await adminRegisterService(payload);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Admin account created successfully!");
+      return { success: true, data: result };
+    } catch (err) {
+      const msg = err.message || "Admin registration failed";
+      toast.error(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  /* ------------------------------------
+             TRAINER LOGIN
+  -------------------------------------*/
+  const trainerLogin = async ({ email, password }) => {
+    try {
+      const result = await trainerLoginService(email, password);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const { user, idToken, refreshToken } = result;
+
+      // 🔥 Normalize role
+      const normalizedUser = {
+        ...user,
+        role: user.role?.toUpperCase()
+      };
+
+      // Save tokens and user
+      saveAuthToken(idToken, refreshToken);
+      saveCurrentUser(normalizedUser);
+
+      setToken(idToken);
+      setUser(normalizedUser);
+
+      toast.success("Trainer login successful");
+      return { success: true, user: normalizedUser };
+    } catch (err) {
+      const msg = err.message || "Trainer login failed";
+      toast.error(msg);
+      return { success: false, error: msg };
+    }
+  };
+
+  /* ------------------------------------
+             TRAINER REGISTER
+  -------------------------------------*/
+  const trainerRegister = async (payload) => {
+    try {
+      const result = await trainerRegisterService(payload);
+      
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      toast.success("Trainer account created successfully!");
+      return { success: true, data: result };
+    } catch (err) {
+      const msg = err.message || "Trainer registration failed";
       toast.error(msg);
       return { success: false, error: msg };
     }
@@ -134,8 +235,8 @@ export const AuthProvider = ({ children }) => {
                LOGOUT
   -------------------------------------*/
   const logout = () => {
-    clearCache(); // Clear API cache on logout
-    localStorage.clear();
+    clearAuthToken();
+    localStorage.removeItem('user');
     setUser(null);
     setToken(null);
     toast.success("Logged out");
@@ -143,8 +244,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const forceLogout = () => {
-    clearCache(); // Clear API cache on logout
-    localStorage.clear();
+    clearAuthToken();
+    localStorage.removeItem('user');
     setUser(null);
     setToken(null);
     toast.error("Session expired. Please login again.");
@@ -161,7 +262,10 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     login,
     adminLogin,
+    trainerLogin,
     register,
+    adminRegister,
+    trainerRegister,
     logout,
     forceLogout,
     refreshProfile: fetchProfile,

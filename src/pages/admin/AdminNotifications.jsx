@@ -10,8 +10,30 @@ const AdminNotifications = () => {
   const loadNotifications = async () => {
     try {
       setLoading(true);
-      const res = await adminApi.getNotifications();
-      setNotifications(res.data?.notifications || []);
+      // Frontend-only: Mock notifications
+      setNotifications([
+        {
+          id: 1,
+          type: 'payment',
+          message: 'Payment received from John Doe',
+          timestamp: new Date().toISOString(),
+          read: false
+        },
+        {
+          id: 2,
+          type: 'alert',
+          message: 'Equipment maintenance required: Treadmill #3',
+          timestamp: new Date(Date.now() - 3600000).toISOString(),
+          read: true
+        },
+        {
+          id: 3,
+          type: 'message',
+          message: 'New trainer signup pending approval',
+          timestamp: new Date(Date.now() - 7200000).toISOString(),
+          read: true
+        }
+      ]);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load notifications');

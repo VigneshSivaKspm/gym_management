@@ -22,15 +22,26 @@ const AdminPanel = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const [profileRes, notifRes, settingsRes] = await Promise.all([
-          axios.get('/api/admin/profile'),
-          axios.get('/api/admin/notifications'),
-          axios.get('/api/admin/settings'),
+        // Mock data for frontend-only deployment
+        // In production with backend, replace with actual API calls
+        setProfile({
+          id: 'admin1',
+          name: 'Admin User',
+          email: localStorage.getItem('email') || 'admin@gym.com',
+          role: 'ADMIN'
+        });
+        setProfileForm({
+          name: 'Admin User',
+          email: localStorage.getItem('email') || 'admin@gym.com',
+          password: ''
+        });
+        setNotifications([
+          { id: 1, message: 'Welcome to Gym Management', read: false }
         ]);
-        setProfile(profileRes.data);
-        setProfileForm({ name: profileRes.data.name || '', email: profileRes.data.email || '', password: '' });
-        setNotifications(notifRes.data.notifications || []);
-        setSettings(settingsRes.data);
+        setSettings({
+          notifications_enabled: true,
+          email_alerts: true
+        });
       } catch (err) {
         console.error(err);
         toast.error('Failed to load admin data');

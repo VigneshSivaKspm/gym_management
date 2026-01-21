@@ -348,14 +348,11 @@ const TraineeDashboard = () => {
   useEffect(() => {
     async function fetchMessaging() {
       try {
-        const [convRes, contactsRes, unreadRes] = await Promise.all([
-          messagingApi.getConversations(),
-          messagingApi.getContacts(),
-          messagingApi.getUnreadCount()
-        ]);
-        setConversations(convRes.data?.conversations || []);
-        setContacts(contactsRes.data?.contacts || []);
-        setUnreadCount(unreadRes.data?.unread_count || 0);
+        // Frontend-only: Messaging disabled
+        setConversations([]);
+        setContacts([]);
+        setUnreadCount(0);
+        toast.error('Messaging feature requires backend connection');
       } catch (err) {
         console.error('Failed to load messaging data:', err);
       }
@@ -402,12 +399,8 @@ const TraineeDashboard = () => {
   const loadMessages = async (userId) => {
     try {
       setMessagesLoading(true);
-      const res = await messagingApi.getMessages(userId);
-      setConversationMessages(res.data?.messages || []);
-      // Scroll to bottom
-      setTimeout(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+      // Frontend-only: Messaging disabled
+      setConversationMessages([]);
     } catch (err) {
       console.error('Failed to load messages:', err);
     } finally {
@@ -420,16 +413,8 @@ const TraineeDashboard = () => {
     if (!newMessage.trim() || !selectedConversation) return;
     
     try {
-      await messagingApi.sendMessage({
-        receiver_id: selectedConversation.id,
-        message: newMessage.trim()
-      });
+      toast.error('Messaging feature requires backend connection');
       setNewMessage('');
-      // Reload messages
-      loadMessages(selectedConversation.id);
-      // Refresh conversations
-      const convRes = await messagingApi.getConversations();
-      setConversations(convRes.data?.conversations || []);
     } catch (err) {
       console.error('Failed to send message:', err);
       alert('Failed to send message');

@@ -35,23 +35,15 @@ const MessageBox = () => {
     
     try {
       setLoading(true)
-      const [outboxRes, inboxRes, usersRes] = await Promise.all([
-        adminApi.getOutbox(),
-        adminApi.getMessages(),
-        adminApi.getUsers()
-      ])
-      setOutbox(outboxRes.data?.messages || [])
-      setInbox(inboxRes.data?.messages || [])
-      const allUsers = usersRes.data?.users || []
-      setUsers(allUsers.filter(u => isTrainer(u.role) || isTrainee(u.role)))
+      // Frontend-only: Messaging disabled
+      setOutbox([])
+      setInbox([])
+      setUsers([])
       setLoaded(true)
+      toast.error('Messaging feature requires backend connection');
     } catch (err) {
-      console.error(err)
-      if (err.code === 'ECONNABORTED') {
-        toast.error('Request timeout loading messages')
-      } else {
-        toast.error(err.message || 'Failed to load messages')
-      }
+      console.error(err);
+      toast.error('Failed to load messages')
     } finally {
       setLoading(false)
     }

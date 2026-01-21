@@ -25,7 +25,7 @@ import {
 
 const TrainerLogin = () => {
   const navigate = useNavigate();
-  const { login, user, loading: authLoading } = useAuth();
+  const { trainerLogin, user, loading: authLoading } = useAuth();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,19 +67,13 @@ const TrainerLogin = () => {
     setError("");
 
     try {
-      // Use the regular login endpoint (backend handles role check)
-      const result = await login({
+      const result = await trainerLogin({
         email: email.trim(),
         password,
       });
 
       if (!result.success) {
-        throw new Error(result.error);
-      }
-
-      // Check if user is trainer
-      if (result.user.role !== "TRAINER") {
-        throw new Error("This portal is for trainers only");
+        throw new Error(result.error || "Trainer login failed");
       }
 
       navigate("/trainer");
@@ -225,7 +219,7 @@ const TrainerLogin = () => {
             <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
               {/* EMAIL FIELD */}
               <div className="space-y-2">
-                <label className="text-slate-300 text-xs sm:text-sm font-medium block flex items-center gap-2">
+                <label className="text-slate-300 text-xs sm:text-sm font-medium block items-center gap-2">
                   <Mail className="w-3.5 h-3.5 text-blue-400" />
                   Trainer Email
                 </label>
@@ -253,7 +247,7 @@ const TrainerLogin = () => {
 
               {/* PASSWORD FIELD */}
               <div className="space-y-2">
-                <label className="text-slate-300 text-xs sm:text-sm font-medium block flex items-center gap-2">
+                <label className="text-slate-300 text-xs sm:text-sm font-medium block items-center gap-2">
                   <Lock className="w-3.5 h-3.5 text-blue-400" />
                   Password
                 </label>

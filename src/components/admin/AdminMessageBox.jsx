@@ -23,25 +23,11 @@ const AdminMessageBox = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await axios.get("/api/admin/users");
-        setUsers(res.data.users || []);
-        // Fetch unread counts for each user
-        const unreadMap = {};
-        for (const u of res.data.users || []) {
-          try {
-            const inboxRes = await axios.get(`/api/admin/messages/${u.id}`);
-            if (Array.isArray(inboxRes.data)) {
-              unreadMap[u.id] = (inboxRes.data.filter(m => !m.is_read).length);
-            } else if (Array.isArray(inboxRes.data.messages)) {
-              unreadMap[u.id] = (inboxRes.data.messages.filter(m => !m.is_read).length);
-            } else {
-              unreadMap[u.id] = 0;
-            }
-          } catch {
-            unreadMap[u.id] = 0;
-          }
-        }
-        setUserUnread(unreadMap);
+        // Frontend-only: Using mock data
+        // Connect to backend when deploying with API
+        const mockUsers = [];
+        setUsers(mockUsers);
+        setUserUnread({});
       } catch (err) {
         setUsers([]);
         setError("Failed to load users");
@@ -55,27 +41,10 @@ const AdminMessageBox = () => {
     if (!selectedUser) return;
     setLoading(true);
     setError("");
-    axios
-      .get(`/api/admin/messages/${selectedUser.id}`)
-      .then(async (res) => {
-        let msgs = res.data;
-        if (msgs && msgs.messages) msgs = msgs.messages;
-        setMessages(msgs);
-        // Mark unread messages as read
-        const unreadMsgs = (msgs || []).filter(m => !m.is_read);
-        for (const m of unreadMsgs) {
-          try {
-            await axios.put(`/api/admin/messages/${m.id}/read`);
-          } catch {}
-        }
-        // Update unread count for this user
-        setUserUnread(prev => ({ ...prev, [selectedUser.id]: 0 }));
-      })
-      .catch(() => {
-        setMessages([]);
-        setError("Failed to load messages");
-      })
-      .finally(() => setLoading(false));
+    // Frontend-only: Using mock data
+    setMessages([]);
+    setUserUnread(prev => ({ ...prev, [selectedUser.id]: 0 }));
+    setLoading(false);
   }, [selectedUser]);
 
   // File/image attachment state

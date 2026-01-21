@@ -2,7 +2,7 @@
 import { createHmac } from "crypto";
 import { jwtVerify, SignJWT } from "jose";
 
-const SECRET_KEY = process.env.REACT_APP_SECRET_KEY || "your-secret-key-change-in-production";
+const SECRET_KEY = (import.meta.env.VITE_SECRET_KEY || import.meta.env.REACT_APP_SECRET_KEY || "your-secret-key-change-in-production") as string;
 const ALGORITHM = "HS256";
 const ACCESS_TOKEN_EXPIRE_MINUTES = 30;
 

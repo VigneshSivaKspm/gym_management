@@ -125,12 +125,10 @@ const TrainerMessageBox = ({ trainees = [], onSelectConversation, selectedConver
   const loadData = useCallback(async (force = false) => {
     try {
       setLoading(true)
-      const [convRes, contactsRes] = await Promise.all([
-        messagingApi.getConversations(),
-        messagingApi.getContacts()
-      ])
-      setConversations(convRes.data?.conversations || [])
-      setContacts(contactsRes.data?.contacts || [])
+      // Frontend-only: Messaging disabled
+      setConversations([])
+      setContacts([])
+      toast.error('Messaging feature requires backend connection');
     } catch (err) {
       console.error('Failed to load messaging data:', err)
       if (err.code !== 'ECONNABORTED') {

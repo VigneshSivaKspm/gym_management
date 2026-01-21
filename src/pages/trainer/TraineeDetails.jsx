@@ -36,32 +36,26 @@ const TraineeDetails = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        // ✅ 1. Get trainee list
+        // ✅ 1. Get trainee list from Firebase
         const tRes = await api.get('/api/trainer/trainees')
         const trainees = tRes?.data?.trainees || []
 
         const found = trainees.find(t => String(t.id) === String(id))
         setTrainee(found || null)
 
-        // ✅ 2. Get workouts
-        const wRes = await api.get(`/api/trainer/trainees/${id}/workouts`)
-        setWorkouts(wRes?.data?.workouts || [])
-
-        // ✅ 3. Get AI reports (only if exists in backend)
-        try {
-          const rRes = await api.get(`/api/trainer/trainees/${id}/ai-reports`)
-          setReports(rRes?.data?.reports || [])
-        } catch {
-          setReports([])
-        }
-
-        // ✅ 4. Get messages (only if exists)
-        try {
-          const mRes = await api.get(`/api/trainer/trainees/${id}/messages`)
-          setMessages(mRes?.data || [])
-        } catch {
-          setMessages([])
-        }
+        // Frontend-only: Mock data for workouts, reports, and messages
+        setWorkouts([
+          {
+            id: 1,
+            exercise_type: 'Push-ups',
+            sets: 3,
+            reps: 20,
+            duration_minutes: 15,
+            date: new Date().toISOString()
+          }
+        ])
+        setReports([])
+        setMessages([])
 
       } catch (err) {
         console.error('Error loading trainee details:', err)
@@ -79,16 +73,8 @@ const TraineeDetails = () => {
     if (!newMessage.trim()) return
 
     try {
-      await api.post(`/api/trainer/trainees/${id}/messages`, {
-        message: newMessage
-      })
-
+      toast.error('Messaging feature requires backend connection')
       setNewMessage('')
-
-      const mRes = await api.get(`/api/trainer/trainees/${id}/messages`)
-      setMessages(mRes?.data || [])
-      toast.success('Message sent!')
-
     } catch (err) {
       console.error('Message error:', err)
       toast.error('Message failed to send')

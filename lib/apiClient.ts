@@ -1,7 +1,7 @@
 // frontend/lib/apiClient.ts
 import { getAccessToken } from "./auth";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.REACT_APP_API_URL || "/api";
 
 interface ApiResponse<T> {
   success: boolean;

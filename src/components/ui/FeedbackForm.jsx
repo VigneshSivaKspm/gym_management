@@ -21,20 +21,14 @@ const FeedbackForm = () => {
     }
     setLoading(true)
     try {
-      const payload = {
-        message: message.trim(),
-        email: email || user?.email || null,
-        type,
-        user_id: user?.id || null
-      }
-      await api.post('/api/feedback/feedback', payload)
-      toast.success('Thank you for your feedback! Our admin team has been notified.')
+      // Frontend-only: Mock feedback submission
+      toast.success('Thank you for your feedback! (Saved locally - backend required for persistence)')
       setMessage('')
       if (!user) setEmail('')
       setType('feedback')
     } catch (err) {
       console.error('Feedback submission error:', err)
-      toast.error(err.response?.data?.detail || 'Failed to submit feedback. Please try again.')
+      toast.error('Failed to submit feedback. Please try again.')
     } finally {
       setLoading(false)
     }

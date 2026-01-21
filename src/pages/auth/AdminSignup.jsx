@@ -19,11 +19,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { authApi } from "../../utils/api";
 
 const AdminSignup = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, adminRegister } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -96,7 +95,7 @@ const AdminSignup = () => {
     setError("");
 
     try {
-      const response = await authApi.register({
+      const result = await adminRegister({
         email: formData.email.trim(),
         password: formData.password,
         name: formData.name,
@@ -105,12 +104,14 @@ const AdminSignup = () => {
         admin_code: signupCode, // Admin creation requires secret code
       });
 
-      if (response.data) {
+      if (result.success) {
         toast.success("Admin account created! Please log in.");
         navigate("/admin-login");
+      } else {
+        setError(result.error || "Signup failed");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      setError(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }

@@ -43,43 +43,29 @@ const TrainerNotifications = ({
   const loadNotifications = useCallback(async () => {
     try {
       setLoading(true)
-      const [convRes, unreadRes, notifRes] = await Promise.all([
-        messagingApi.getConversations(),
-        messagingApi.getUnreadCount(),
-        trainerDashboardApi.getNotifications(false).catch(() => ({ data: { notifications: [] } }))
-      ])
-      
-      const convs = convRes.data?.conversations || []
-      const notifs = notifRes.data?.notifications || []
-      
-      // Combine conversations with unread messages into notifications
-      const messageNotifs = convs
-        .filter(c => c.unread_count > 0)
-        .map(c => ({
-          id: `msg-${c.user_id}`,
-          type: 'message',
-          title: `New message from ${c.user_name}`,
-          message: c.last_message,
-          user_id: c.user_id,
-          user_name: c.user_name,
-          user_role: c.user_role,
-          unread_count: c.unread_count,
-          created_at: c.last_message_time,
+      // Frontend-only: Mock notifications
+      const mockNotifications = [
+        {
+          id: 'sys-1',
+          type: 'system',
+          title: 'Welcome to Trainer Dashboard',
+          message: 'You are connected to the frontend-only application',
+          created_at: new Date().toISOString(),
           importance: 'normal'
-        }))
+        },
+        {
+          id: 'sys-2',
+          type: 'schedule',
+          title: 'Upcoming Training Session',
+          message: 'Class scheduled in 2 hours',
+          created_at: new Date(Date.now() - 3600000).toISOString(),
+          importance: 'high'
+        }
+      ]
       
-      // Combine all notifications
-      const allNotifications = [
-        ...messageNotifs,
-        ...notifs.map(n => ({
-          ...n,
-          type: n.type || 'system'
-        }))
-      ].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
-      
-      setNotifications(allNotifications)
-      setConversations(convs)
-      setUnreadCount(unreadRes.data?.unread_count || 0)
+      setNotifications(mockNotifications)
+      setConversations([])
+      setUnreadCount(0)
     } catch (err) {
       console.error('Failed to load notifications:', err)
     } finally {

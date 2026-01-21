@@ -18,11 +18,10 @@ import {
   Briefcase,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { authApi } from "../../utils/api";
 
 const TrainerSignup = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, trainerRegister } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -96,7 +95,7 @@ const TrainerSignup = () => {
     setError("");
 
     try {
-      const response = await authApi.register({
+      const result = await trainerRegister({
         email: formData.email.trim(),
         password: formData.password,
         name: formData.name,
@@ -107,12 +106,14 @@ const TrainerSignup = () => {
         certifications: formData.certifications,
       });
 
-      if (response.data) {
+      if (result.success) {
         toast.success("Trainer account created! Please log in.");
         navigate("/trainer-login");
+      } else {
+        setError(result.error || "Signup failed");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Signup failed");
+      setError(err.message || "Signup failed");
     } finally {
       setLoading(false);
     }

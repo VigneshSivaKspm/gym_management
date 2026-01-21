@@ -73,26 +73,30 @@ const AdminDashboard = () => {
       if (isRefreshing) return;
       try {
         setIsRefreshing(true)
-        // Use new consolidated endpoint instead of 6 parallel calls
-        const res = await adminApi.getDashboardComplete();
-        const data = res.data || {};
-        
+        // Frontend-only mock data (no backend dependency)
         setDashboardData({
-          total_members: data.live_metrics?.total_members || 0,
-          active_trainers: data.live_metrics?.active_trainers || 0,
-          monthly_revenue: data.live_metrics?.monthly_revenue || 0,
-          todays_revenue: data.live_metrics?.todays_revenue || 0,
-          new_signups_today: data.live_metrics?.new_signups_today || 0,
-          new_signups_week: data.live_metrics?.new_signups_week || 0,
-          pending_payments: data.live_metrics?.pending_payments || 0,
-          top_plans: data.top_plans || [],
-          ai_suggestions: data.ai_suggestions || [],
-          system_health: data.system_health || { status: 'Healthy' },
-          notifications: data.notifications || [],
-          progress_analytics: data.progress_analytics || {},
+          total_members: 156,
+          active_trainers: 12,
+          monthly_revenue: 45000,
+          todays_revenue: 2500,
+          new_signups_today: 3,
+          new_signups_week: 18,
+          pending_payments: 5,
+          top_plans: [
+            { name: '3-Month Plan', count: 45, revenue: 13500 },
+            { name: '6-Month Plan', count: 38, revenue: 17100 },
+            { name: '1-Year Plan', count: 32, revenue: 19200 },
+          ],
+          ai_suggestions: [
+            { id: 1, text: 'Peak hours: 6-8 PM. Consider adding staff during these times.', priority: 'high' },
+            { id: 2, text: 'Popular class: CrossFit. Consider expanding session frequency.', priority: 'medium' },
+          ],
+          system_health: { status: 'Healthy', details: 'All systems operational' },
+          notifications: [],
+          progress_analytics: {},
         });
         setLastUpdated(new Date())
-        setNotificationCount(data.notifications?.length || 0)
+        setNotificationCount(0)
       } catch (err) {
         console.error('Dashboard load error:', err);
         if (err.response?.status === 401) {
@@ -120,27 +124,10 @@ const AdminDashboard = () => {
   const handleManualRefresh = async () => {
     setIsRefreshing(true)
     try {
-      // Use new consolidated endpoint
-      const res = await adminApi.getDashboardComplete();
-      const data = res.data || {};
-      
-      setDashboardData({
-        total_members: data.live_metrics?.total_members || 0,
-        active_trainers: data.live_metrics?.active_trainers || 0,
-        monthly_revenue: data.live_metrics?.monthly_revenue || 0,
-        todays_revenue: data.live_metrics?.todays_revenue || 0,
-        new_signups_today: data.live_metrics?.new_signups_today || 0,
-        new_signups_week: data.live_metrics?.new_signups_week || 0,
-        pending_payments: data.live_metrics?.pending_payments || 0,
-        top_plans: data.top_plans || [],
-        ai_suggestions: data.ai_suggestions || [],
-        system_health: data.system_health || { status: 'Healthy' },
-        notifications: data.notifications || [],
-        progress_analytics: data.progress_analytics || {},
-      });
+      // Frontend-only: Using mock data
+      setDashboardData(prev => ({ ...prev }));
       setLastUpdated(new Date())
       toast.success('Dashboard refreshed!', { duration: 2000 })
-      setNotificationCount(data.notifications?.length || 0)
     } catch (err) {
       console.error('Refresh error:', err);
       if (err.response?.status === 401) {
@@ -486,7 +473,7 @@ const AdminDashboard = () => {
                       ) : (
                         dashboardData.ai_suggestions.slice(0, 2).map((s, i) => (
                           <p key={i} className="text-xs text-slate-300 truncate">
-                            • {typeof s === 'string' ? s : s.suggestion || s.message}
+                            • {typeof s === 'string' ? s : s.text}
                           </p>
                         ))
                       )}

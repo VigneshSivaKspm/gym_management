@@ -123,22 +123,14 @@ const TrainerDashboard = () => {
 
         // Load dashboard stats
         try {
-          const dashRes = await api.get('/api/trainer/dashboard')
-          const totalWorkouts = dashRes.data.total_workouts || 0
-          const complianceRes = await api.get('/api/trainer/compliance-overview')
-          const avgAdherence = complianceRes.data.average_adherence || 0
-
+          // Frontend-only: Mock stats (no backend)
           setDashboardStats({
             totalTrainees: traineesData.length,
-            totalWorkouts: totalWorkouts,
-            completedWorkouts: totalWorkouts,
-            successRate: avgAdherence,
+            totalWorkouts: traineesData.length * 4,
+            completedWorkouts: traineesData.length * 3,
+            successRate: 75,
             avgProgress: traineesData.length > 0 ? Math.min(25, 5 + traineesData.length) : 0
           })
-
-          // Load real activity
-          const activityRes = await trainerDashboardApi.getActivity()
-          setRecentActivity(activityRes.data || [])
         } catch (err) {
           console.error('Failed to load dashboard stats', err)
           setDashboardStats(prev => ({ ...prev, totalTrainees: traineesData.length }))
@@ -183,15 +175,12 @@ const TrainerDashboard = () => {
   // Fetch messaging data
   const fetchMessagingData = async () => {
     try {
-      const [convRes, contactsRes, unreadRes] = await Promise.all([
-        messagingApi.getConversations(),
-        messagingApi.getContacts(),
-        messagingApi.getUnreadCount()
-      ]);
-      setConversations(convRes.data?.conversations || []);
-      setContacts(contactsRes.data?.contacts || []);
-      setUnreadCount(unreadRes.data?.unread_count || 0);
-      setNotificationCount(unreadRes.data?.unread_count || 0);
+      // Frontend-only: Mock messaging data
+      setConversations([]);
+      setContacts([]);
+      setUnreadCount(0);
+      setNotificationCount(0);
+      toast.info('Messaging feature requires backend connection');
     } catch (err) {
       console.error('Failed to load messaging data:', err);
     }
@@ -243,25 +232,11 @@ const TrainerDashboard = () => {
   // Send message
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation) return;
-
+    
     try {
-      if (selectedConversation?.isTrainee) {
-        // Send to trainee
-        await api.post(`/api/trainer/trainees/${selectedConversation.id}/messages`, {
-          message: newMessage.trim()
-        });
-      } else {
-        // Send general message
-        await messagingApi.sendMessage({
-          receiver_id: selectedConversation.id,
-          message: newMessage.trim()
-        });
-      }
+      // Frontend-only: Messaging disabled
+      toast.error('Messaging feature requires backend connection');
       setNewMessage('');
-      loadMessages(selectedConversation.id, selectedConversation?.isTrainee);
-      const convRes = await messagingApi.getConversations();
-      setConversations(convRes.data?.conversations || []);
-      toast.success('Message sent!');
     } catch (err) {
       console.error('Failed to send message:', err);
       toast.error('Failed to send message');
@@ -306,14 +281,18 @@ const TrainerDashboard = () => {
       setAnalyticsLoading(true)
       setSelectedTrainee(trainee)
 
-      const [progressRes, milestonesRes] = await Promise.all([
-        api.get(`/api/trainer/trainee/${trainee.id}/progress-summary`),
-        api.get(`/api/trainer/trainee/${trainee.id}/milestones`)
-      ])
-
+      // Frontend-only: Mock analytics
       setTraineeAnalytics({
-        progress: progressRes.data,
-        milestones: milestonesRes.data
+        progress: {
+          strength: 65,
+          endurance: 72,
+          flexibility: 58,
+          overall: 65
+        },
+        milestones: [
+          { name: 'First Workout', achieved: true, date: '2025-01-01' },
+          { name: '10 Workouts Completed', achieved: true, date: '2025-01-15' }
+        ]
       })
       setShowAnalyticsModal(true)
     } catch (err) {

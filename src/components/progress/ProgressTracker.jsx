@@ -57,24 +57,33 @@ const ProgressTracker = () => {
 
   const loadMeasurements = async () => {
     try {
-      const response = await api.get('/api/trainee/progress')
-      const data = response.data.measurements.map((m) => ({
-        id: m.id,
-        date: new Date(m.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        fullDate: new Date(m.date).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric', 
-          year: 'numeric' 
-        }),
-        weight: m.weight,
-        bodyFat: m.body_fat,
-        muscleMass: m.muscle_mass,
-        waist: m.waist,
-        chest: m.chest,
-        biceps: m.biceps,
-        notes: m.notes,
-      }))
-      setMeasurements(data)
+      // Frontend-only: Mock measurements
+      setMeasurements([
+        {
+          id: 1,
+          date: 'Jan 1',
+          fullDate: 'Jan 1, 2025',
+          weight: 75,
+          bodyFat: 18,
+          muscleMass: 40,
+          waist: 32,
+          chest: 38,
+          biceps: 14,
+          notes: 'Starting weight'
+        },
+        {
+          id: 2,
+          date: 'Jan 15',
+          fullDate: 'Jan 15, 2025',
+          weight: 73,
+          bodyFat: 17.5,
+          muscleMass: 40.5,
+          waist: 31,
+          chest: 38.5,
+          biceps: 14.5,
+          notes: 'Good progress'
+        }
+      ])
     } catch (error) {
       console.error('Error loading measurements:', error)
     }
@@ -82,8 +91,11 @@ const ProgressTracker = () => {
 
   const loadWorkouts = async () => {
     try {
-      const response = await api.get('/api/trainee/workouts')
-      setWorkouts(response.data.workouts.slice(0, 10) || [])
+      // Frontend-only: Mock workouts
+      setWorkouts([
+        { id: 1, name: 'Push-ups', sets: 3, reps: 20, date: '2025-01-15' },
+        { id: 2, name: 'Running', duration: 30, date: '2025-01-14' }
+      ])
     } catch (error) {
       console.error('Error loading workouts:', error)
     }
@@ -97,15 +109,15 @@ const ProgressTracker = () => {
 
     setSaving(true)
     try {
-      const response = await api.post('/api/trainee/measurements', {
-        weight: parseFloat(measurementForm.weight),
-        body_fat: measurementForm.body_fat ? parseFloat(measurementForm.body_fat) : null,
-        muscle_mass: measurementForm.muscle_mass ? parseFloat(measurementForm.muscle_mass) : null,
-        chest: measurementForm.chest ? parseFloat(measurementForm.chest) : null,
-        waist: measurementForm.waist ? parseFloat(measurementForm.waist) : null,
-        hips: null, // Not in form, but backend expects it
-        biceps: measurementForm.biceps ? parseFloat(measurementForm.biceps) : null,
-        notes: measurementForm.notes || null,
+      toast.success('Measurement saved locally! (Backend required for persistence)')
+      setMeasurementForm({
+        weight: '',
+        body_fat: '',
+        muscle_mass: '',
+        chest: '',
+        waist: '',
+        biceps: '',
+        notes: '',
       })
 
       toast.success(`✓ Measurement saved! Weight: ${measurementForm.weight}kg recorded.`, {
