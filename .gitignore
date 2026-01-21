@@ -40,3 +40,4 @@ out/
 build/
 dist/
 .nuxt/
+.vercel

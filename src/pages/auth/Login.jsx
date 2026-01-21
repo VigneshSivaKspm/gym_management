@@ -23,7 +23,7 @@ import {
   Check
 } from "lucide-react";
 
-import "./login.css";
+import "./Login.css";
 
 const Login = () => {
   const navigate = useNavigate();
