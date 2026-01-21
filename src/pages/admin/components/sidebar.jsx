@@ -24,24 +24,6 @@ const Sidebar = ({ activeTab, onChangeTab }) => {
 
   return (
     <aside className="w-64 bg-slate-900/95 backdrop-blur-md border-r border-slate-800 flex flex-col h-full min-h-screen">
-      {/* Sidebar Header */}
-      <div className="p-5 border-b border-slate-800/80">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-11 h-11 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform">
-              <Dumbbell className="text-white w-6 h-6 transform -rotate-45" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-slate-900"></div>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-white tracking-wide">
-              Fit<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400">Mate</span>
-            </h2>
-            <p className="text-slate-400 text-[10px] font-medium tracking-wide">ADMIN DASHBOARD</p>
-          </div>
-        </div>
-      </div>
-
       {/* Navigation */}
       <nav className="flex-1 px-3 py-5 space-y-6 overflow-y-auto custom-scrollbar">
         {sections.map((section) => (

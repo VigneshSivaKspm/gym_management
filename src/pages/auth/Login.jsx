@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import {
   Mail,
@@ -381,9 +381,18 @@ const Login = () => {
             {/* FOOTER */}
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <p className="text-slate-400 text-sm">
-                Need an account?{" "}
-                <span className="text-green-400 font-medium">
-                  Contact your trainer or admin
+                New to FitMate?{" "}
+                <Link
+                  to="/signup"
+                  className="text-green-400 hover:text-green-300 font-medium transition"
+                >
+                  Create an account
+                </Link>
+              </p>
+              <p className="text-slate-500 text-xs mt-3">
+                Trainer or Admin?{" "}
+                <span className="text-slate-400">
+                  Contact your administrator
                 </span>
               </p>
             </div>

@@ -11,6 +11,7 @@ import AdminLogin from './pages/auth/AdminLogin'
 import AdminSignup from './pages/auth/AdminSignup'
 import TrainerLogin from './pages/auth/TrainerLogin'
 import TrainerSignup from './pages/auth/TrainerSignup'
+import TraineeSignup from './pages/auth/TraineeSignup'
 import FeedbackPage from './pages/FeedbackPage'
 
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -34,6 +35,7 @@ function App() {
               {/* ================= PUBLIC ROUTES ================= */}
               <Route path="/" element={<HeroPage />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<TraineeSignup />} />
               <Route path="/admin-login" element={<AdminLogin />} />
               <Route path="/admin-signup" element={<AdminSignup />} />
               <Route path="/trainer-login" element={<TrainerLogin />} />
