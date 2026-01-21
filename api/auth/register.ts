@@ -69,9 +69,12 @@ export default async function handler(
     });
   } catch (error: any) {
     console.error("Registration error:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
     return res.status(500).json({
       success: false,
       message: error.message || "Internal server error",
+      error: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 }
