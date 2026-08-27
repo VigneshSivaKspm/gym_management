@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ==========================================
+    // USER COLLECTION - Read/Write Rules
+    // ==========================================
+    
+    // Allow users to read/write their own user documents
+    match /users/{userId} {
+      // Allow write if user is creating their own account or is admin
+      allow write: if request.auth.uid == userId || isAdmin();
+      
+      // Allow read if:
+      // 1. User is reading their own document
+      // 2. User is authenticated (for profile lookups from backend)
+      // 3. Request has proper authorization
+      allow read: if request.auth != null && (
+        request.auth.uid == userId || 
+        isAdmin()
+      );
+    }
+    
+    // ==========================================
+    // WORKOUT COLLECTION
+    // ==========================================
+    match /workouts/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // NUTRITION LOGS COLLECTION
+    // ==========================================
+    match /nutrition_logs/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // MESSAGES COLLECTION
+    // ==========================================
+    match /messages/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // TRAINERS COLLECTION
+    // ==========================================
+    match /trainers/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && isTrainerOrAdmin();
+    }
+    
+    // ==========================================
+    // TRAINEES COLLECTION
+    // ==========================================
+    match /trainees/{document=**} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+    
+    // ==========================================
+    // HELPER FUNCTIONS
+    // ==========================================
+    
+    // Check if user is admin
+    function isAdmin() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+    
+    // Check if user is trainer or admin
+    function isTrainerOrAdmin() {
+      let role = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return role == 'TRAINER' || role == 'ADMIN';
+    }
+  }
+}
